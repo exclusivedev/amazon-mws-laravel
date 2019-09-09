@@ -315,7 +315,8 @@ class AmazonFeed extends AmazonFeedsCore
      */
     protected function genHeader()
     {
-        $return[0] = "Content-MD5:" . $this->feedMD5;
+        $return[0] = "Content-Type: text/xml";
+        $return[1] = "Content-MD5:" . $this->feedMD5;
         return $return;
     }
 
