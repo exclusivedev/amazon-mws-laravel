@@ -1,5 +1,8 @@
 # CHANGELOG
 
+### 2019-09-09 - Version 3.1.0
+- Added mandatory "Content-Type: text/xml" to genHeader method.
+
 ### 2018-11-08 - Version 3.0.5
 
 - [[PR #17](https://github.com/sonnenglas/amazon-mws-laravel/pull/17)] Fix to include relationships including additional ns2 attributes
