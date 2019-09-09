@@ -1,40 +1,20 @@
-amazon-mws-laravel
+Amazon MWS for Laravel 5.5+
 ============
+A Laravel package to connect to Amazon's Merchant Web Services (MWS) in an object-oriented manner, with a focus on intuitive usage. Based on sonnenglas/amazon-mws-laravel and creacoon/amazon-mws-laravel package and modified to make it compatible with latest Laravel releases + bugfixes for setting a text/xml header.
 
-A PHP package to connect to Amazon's Merchant Web Services (MWS) in an object-oriented manner, with a focus on intuitive usage.
-
-Currently optimizing for Laravel Framework.
+Currently optimizing for Laravel Framework 5.5+.
 
 This is __NOT__ for Amazon Web Services (AWS) - Cloud Computing Services.
 
 ## Installation
 
-1. `composer require sonnenglas/laravel5-amazon-mws`
+1. `composer require deniztezcan/laravel-amazon-mws`
 
 2. add the service provider to the providers array in config/app.php:
 ```
-Sonnenglas\AmazonMws\ServiceProvider::class,
+DenizTezcan\AmazonMws\ServiceProvider::class,
 ```
-
-There's no facades to add in config/app.php
-
 3. Copy amazon-mws.php configuration file from src/config/amazon-mws.php to Laravel's config directory.
-
-## Usage
-All of the technical details required by the API are handled behind the scenes,
-so users can easily build code for sending requests to Amazon
-without having to jump hurdles such as parameter URL formatting and token management. 
-The general work flow for using one of the objects is this:
-
-1. Create an object for the task you need to perform.
-2. Load it up with parameters, depending on the object, using *set____* methods.
-3. Submit the request to Amazon. The methods to do this are usually named *fetch____* or *submit____* and have no parameters.
-4. Reference the returned data, whether as single values or in bulk, using *get____* methods.
-5. Monitor the performance of the library using the built-in logging system.
-
-Note that if you want to act on more than one Amazon store, you will need a separate object for each store.
-
-Also note that the objects perform best when they are not treated as reusable. Otherwise, you may end up grabbing old response data if a new request fails.
 
 ## Example Usage
 
@@ -45,7 +25,7 @@ without having to jump hurdles such as parameter URL formatting and token manage
 
 Here is an example of a function used to get all warehouse-fulfilled orders from Amazon updated in the past 24 hours:
 ```php
-use Sonnenglas\AmazonMws\AmazonOrderList;
+use DenizTezcan\AmazonMws\AmazonOrderList;
 
 function getAmazonOrders() {
     $amz = new AmazonOrderList("myStore"); //store name matches the array key in the config file
@@ -61,7 +41,7 @@ function getAmazonOrders() {
 ```
 This example shows a function used to send a previously-created XML feed to Amazon to update Inventory numbers:
 ```php
-use Sonnenglas\AmazonMws\AmazonOrderList;
+use DenizTezcan\AmazonMws\AmazonOrderList;
 
 function sendInventoryFeed($feed) {
     $amz = new AmazonFeed("myStore"); //store name matches the array key in the config file

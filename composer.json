@@ -1,5 +1,5 @@
 {
-    "name": "deniztezcan/laravel5-amazon-mws",
+    "name": "deniztezcan/laravel-amazon-mws",
     "description": "Use Amazon's MWS web services with Laravel 5.x/6.0. Based on sonnenglas/amazon-mws-laravel and creacoon/amazon-mws-laravel package and modified to make it compatible with latest Laravel releases (+ bugfixes for setting a text/xml header).",
     "license": "Apache-2.0",
     "keywords": ["API", "Amazon", "PHP", "MWS", "Laravel"],

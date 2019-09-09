@@ -1,6 +1,6 @@
-<?php namespace Sonnenglas\AmazonMws;
+<?php namespace DenizTezcan\AmazonMws;
 
-use Sonnenglas\AmazonMws\AmazonInventoryCore;
+use DenizTezcan\AmazonMws\AmazonInventoryCore;
 
 /**
  * Copyright 2013 CPI Group, LLC
