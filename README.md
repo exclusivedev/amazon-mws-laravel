@@ -14,7 +14,10 @@ This is __NOT__ for Amazon Web Services (AWS) - Cloud Computing Services.
 ```
 DenizTezcan\AmazonMws\ServiceProvider::class,
 ```
-3. Copy amazon-mws.php configuration file from src/config/amazon-mws.php to Laravel's config directory.
+3. Copy the configuration file to Laravel's config directory.
+```
+php artisan vendor:publish --provider="DenizTezcan\AmazonMws\ServiceProvider"
+```
 
 ## Example Usage
 
