@@ -1,4 +1,4 @@
-<?php namespace DenizTezcan\AmazonMws;
+<?php namespace ExclusiveDev\AmazonMws;
 
 /**
  * Copyright 2013 CPI Group, LLC

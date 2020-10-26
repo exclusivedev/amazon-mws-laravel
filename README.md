@@ -1,22 +1,20 @@
-Amazon MWS for Laravel 5.5+
+Amazon MWS for Laravel 5-8
 ============
 A Laravel package to connect to Amazon's Merchant Web Services (MWS) in an object-oriented manner, with a focus on intuitive usage. Based on sonnenglas/amazon-mws-laravel and creacoon/amazon-mws-laravel package and modified to make it compatible with latest Laravel releases + bugfixes for setting a text/xml header.
-
-Currently optimizing for Laravel Framework 5.5+.
 
 This is __NOT__ for Amazon Web Services (AWS) - Cloud Computing Services.
 
 ## Installation
 
-1. `composer require deniztezcan/laravel-amazon-mws`
+1. `composer require ExclusiveDev/laravel-amazon-mws`
 
 2. add the service provider to the providers array in config/app.php:
 ```
-DenizTezcan\AmazonMws\ServiceProvider::class,
+ExclusiveDev\AmazonMws\ServiceProvider::class,
 ```
 3. Copy the configuration file to Laravel's config directory.
 ```
-php artisan vendor:publish --provider="DenizTezcan\AmazonMws\ServiceProvider"
+php artisan vendor:publish --provider="ExclusiveDev\AmazonMws\ServiceProvider"
 ```
 
 ## Example Usage
@@ -28,7 +26,7 @@ without having to jump hurdles such as parameter URL formatting and token manage
 
 Here is an example of a function used to get all warehouse-fulfilled orders from Amazon updated in the past 24 hours:
 ```php
-use DenizTezcan\AmazonMws\AmazonOrderList;
+use ExclusiveDev\AmazonMws\AmazonOrderList;
 
 function getAmazonOrders() {
     $amz = new AmazonOrderList("myStore"); //store name matches the array key in the config file
@@ -44,7 +42,7 @@ function getAmazonOrders() {
 ```
 This example shows a function used to send a previously-created XML feed to Amazon to update Inventory numbers:
 ```php
-use DenizTezcan\AmazonMws\AmazonOrderList;
+use ExclusiveDev\AmazonMws\AmazonOrderList;
 
 function sendInventoryFeed($feed) {
     $amz = new AmazonFeed("myStore"); //store name matches the array key in the config file

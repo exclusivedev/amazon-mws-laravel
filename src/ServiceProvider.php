@@ -1,5 +1,5 @@
 <?php 
-namespace DenizTezcan\AmazonMws;
+namespace ExclusiveDev\AmazonMws;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
@@ -20,16 +20,15 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        $configPath = __DIR__ . '/config/amazon-mws.php';
+        $configPath = __DIR__ . '\config\amazon-mws.php';
         $this->mergeConfigFrom($configPath, 'amazon-mws');
-
-        $this->app->alias('AmazonOrderList', 'DenizTezcan\AmazonMws\AmazonOrderList');
-        $this->app->alias('AmazonOrderItemList', 'DenizTezcan\AmazonMws\AmazonOrderItemList');
+        $this->app->alias('AmazonOrderList', 'ExclusiveDev\AmazonMws\AmazonOrderList');
+        $this->app->alias('AmazonOrderItemList', 'ExclusiveDev\AmazonMws\AmazonOrderItemList');
     }
 
     public function boot()
     {
-        $configPath = __DIR__ . '/../../config/amazon-mws.php';
+        $configPath = __DIR__ . '\config\amazon-mws.php';        
         $this->publishes([$configPath => config_path('amazon-mws.php')], 'config');
     }
 

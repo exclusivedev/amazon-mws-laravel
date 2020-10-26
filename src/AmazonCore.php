@@ -1,4 +1,4 @@
-<?php namespace DenizTezcan\AmazonMws;
+<?php namespace ExclusiveDev\AmazonMws;
 
 use Config, Log;
 use DateTime;
@@ -114,6 +114,7 @@ abstract class AmazonCore
     protected $marketplaceId;
     protected $rawResponses = array();
     protected $proxyInfo = [];
+    protected $secretKey;
 
     /**
      * AmazonCore constructor sets up key information used in all Amazon requests.
@@ -390,6 +391,13 @@ abstract class AmazonCore
         }
     }
 
+    public static function getStoreName($merchantId, $marketplaceId)
+    {        
+        $response = self::fetchURL("https://www.amazon.com/sp?seller=$merchantId", ["Encoding" => "gzip"]);
+        $matches = [];        
+        if (preg_match("/Profile: (.*)</", $response['body'], $matches))
+            return $matches[1];        
+    }
     /**
      * Sets the store values.
      *
@@ -403,49 +411,51 @@ abstract class AmazonCore
      */
     public function setStore($s)
     {
-        // if (file_exists($this->config)){
-        //     include($this->config);
-        // } else {
-        //     throw new \Exception("Config file does not exist!");
-        // }
-
-        $store = Config::get('amazon-mws.store');
-
-        if (array_key_exists($s, $store)) {
-            $this->storeName = $s;
-            if (array_key_exists('merchantId', $store[$s])) {
-                $this->options['SellerId'] = $store[$s]['merchantId'];
-            } else {
-                $this->log("Merchant ID is missing!", 'Warning');
-            }
-            if (array_key_exists('keyId', $store[$s])) {
-                $this->options['AWSAccessKeyId'] = $store[$s]['keyId'];
-            } else {
-                $this->log("Access Key ID is missing!", 'Warning');
-            }
-            if (!array_key_exists('secretKey', $store[$s])) {
-                $this->log("Secret Key is missing!", 'Warning');
-            }
-            // Overwrite Amazon service url if specified
-            if (array_key_exists('amazonServiceUrl', $store[$s])) {
-                $AMAZON_SERVICE_URL = $store[$s]['amazonServiceUrl'];
-                $this->urlbase = $AMAZON_SERVICE_URL;
-            }
-            if (array_key_exists('proxyInfo', $store[$s])) {
-                $this->proxyInfo = $store[$s]['proxyInfo'];
-            }
-
-            if (array_key_exists('authToken', $store[$s]) && !empty($store[$s]['authToken'])) {
-                $this->options['MWSAuthToken'] = $store[$s]['authToken'];
-            }
-
-            if (array_key_exists('marketplaceId', $store[$s]) && !empty($store[$s]['marketplaceId'])) {
-                $this->marketplaceId = $store[$s]['marketplaceId'];
-            }
-
+        if (is_array($s)) {
+            $this->secretKey = $s['secretKey'];
+            unset($s['secretKey']);
+            $this->options = $s;
         } else {
-            throw new \Exception("Store $s does not exist!");
-            $this->log("Store $s does not exist!", 'Warning');
+
+            $store = Config::get('amazon-mws.store');
+
+            if (array_key_exists($s, $store)) {
+                $this->storeName = $s;
+                if (array_key_exists('merchantId', $store[$s])) {
+                    $this->options['SellerId'] = $store[$s]['merchantId'];
+                } else {
+                    $this->log("Merchant ID is missing!", 'Warning');
+                }
+                if (array_key_exists('keyId', $store[$s])) {
+                    $this->options['AWSAccessKeyId'] = $store[$s]['keyId'];
+                } else {
+                    $this->log("Access Key ID is missing!", 'Warning');
+                }
+                if (array_key_exists('secretKey', $store[$s])) {
+                    $this->secretKey = $store[$s]['secretKey'];
+                } else {
+                    $this->log("Secret Key is missing!", 'Warning');
+                }
+                // Overwrite Amazon service url if specified
+                if (array_key_exists('amazonServiceUrl', $store[$s])) {
+                    $AMAZON_SERVICE_URL = $store[$s]['amazonServiceUrl'];
+                    $this->urlbase = $AMAZON_SERVICE_URL;
+                }
+                if (array_key_exists('proxyInfo', $store[$s])) {
+                    $this->proxyInfo = $store[$s]['proxyInfo'];
+                }
+
+                if (array_key_exists('authToken', $store[$s]) && !empty($store[$s]['authToken'])) {
+                    $this->options['MWSAuthToken'] = $store[$s]['authToken'];
+                }
+
+                if (array_key_exists('marketplaceId', $store[$s]) && !empty($store[$s]['marketplaceId'])) {
+                    $this->marketplaceId = $store[$s]['marketplaceId'];
+                }
+            } else {
+                throw new \Exception("Store $s does not exist!");
+                $this->log("Store $s does not exist!", 'Warning');
+            }
         }
     }
 
@@ -583,24 +593,11 @@ abstract class AmazonCore
      * @throws Exception if config file or secret key is missing
      */
     protected function genQuery()
-    {
-        // if (file_exists($this->config)){
-        //     include($this->config);
-        // } else {
-        //     throw new Exception("Config file does not exist!");
-        // }
-
-        $store = Config::get('amazon-mws.store');
-
-        if (array_key_exists($this->storeName, $store) && array_key_exists('secretKey', $store[$this->storeName])) {
-            $secretKey = $store[$this->storeName]['secretKey'];
-        } else {
-            throw new Exception("Secret Key is missing!");
-        }
+    {        
 
         unset($this->options['Signature']);
         $this->options['Timestamp'] = $this->genTime();
-        $this->options['Signature'] = $this->_signParameters($this->options, $secretKey);
+        $this->options['Signature'] = $this->_signParameters($this->options, $this->secretKey);
         return $this->_getParametersAsString($this->options);
     }
 
@@ -615,7 +612,7 @@ abstract class AmazonCore
     protected function sendRequest($url, $param)
     {
         $this->log("Making request to Amazon: " . $this->options['Action']);
-        $response = $this->fetchURL($url, $param);
+        $response = $this->fetchURL($url, $param, $this->proxyInfo);
 
         if (!isset($response['code'])) {
             $this->log("Unrecognized response: ".print_r($response, true));
@@ -623,7 +620,7 @@ abstract class AmazonCore
         }
         while ($response['code'] == '503' && $this->throttleStop == false) {
             $this->sleep();
-            $response = $this->fetchURL($url, $param);
+            $response = $this->fetchURL($url, $param, $this->proxyInfo);
         }
 
         $this->rawResponses[] = $response;
@@ -712,7 +709,7 @@ abstract class AmazonCore
      *               $return['error'] - error, if "ok" is not 1
      *               $return['head']  - http header
      */
-    function fetchURL($url, $param)
+    static function fetchURL($url, $param, $proxyInfo=[])
     {
         $return = array();
 
@@ -731,17 +728,20 @@ abstract class AmazonCore
             if (!empty($param['Post'])) {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $param['Post']);
             }
+            if (!empty($param['Encoding'])) {
+                curl_setopt($ch,CURLOPT_ENCODING , $param['Encoding']);
+            }            
         }
 
-        if (!empty($this->proxyInfo)
-            && !empty($this->proxyInfo['ip'])
-            && !empty($this->proxyInfo['port'])
+        if (!empty($proxyInfo)
+            && !empty($proxyInfo['ip'])
+            && !empty($proxyInfo['port'])
         ) {
             curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
-            curl_setopt($ch, CURLOPT_PROXY, $this->proxyInfo['ip']);
-            curl_setopt($ch, CURLOPT_PROXYPORT, $this->proxyInfo['port']);
-            if (!empty($this->proxyInfo['user_pwd'])) {
-                curl_setopt($ch, CURLOPT_PROXYUSERPWD, $this->proxyInfo['user_pwd']);
+            curl_setopt($ch, CURLOPT_PROXY, $proxyInfo['ip']);
+            curl_setopt($ch, CURLOPT_PROXYPORT, $proxyInfo['port']);
+            if (!empty($proxyInfo['user_pwd'])) {
+                curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxyInfo['user_pwd']);
             }
             curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
         }
@@ -758,18 +758,18 @@ abstract class AmazonCore
         }
         $data = preg_split("/\r\n\r\n/", $data, 2, PREG_SPLIT_NO_EMPTY);
         if (!empty($data)) {
-            $return['head'] = (isset($data[0]) ? $data[0] : null);
-            $return['body'] = (isset($data[1]) ? $data[1] : null);
+            $return['head'] = isset($data[0]) ? $data[0] : null;
+            $return['body'] = isset($data[1]) ? $data[1] : null;
         } else {
             $return['head'] = null;
             $return['body'] = null;
         }
 
         $matches = array();
-        $data = preg_match("/HTTP\/[0-9.]+ ([0-9]+) (.+)\r\n/", $return['head'], $matches);
+        $data = preg_match("/HTTP\/[0-9.]+ ([0-9]+)\s?(.+)?\r\n/", $return['head'], $matches);
         if (!empty($matches)) {
             $return['code'] = $matches[1];
-            $return['answer'] = $matches[2];
+            $return['answer'] = isset($matches[2]) ? $matches[2] : null;
         }
 
         $data = preg_match("/meta http-equiv=.refresh. +content=.[0-9]*;url=([^'\"]*)/i", $return['body'], $matches);

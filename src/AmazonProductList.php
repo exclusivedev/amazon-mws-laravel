@@ -1,6 +1,6 @@
-<?php namespace DenizTezcan\AmazonMws;
+<?php namespace ExclusiveDev\AmazonMws;
 
-use DenizTezcan\AmazonMws\AmazonProductsCore;
+use ExclusiveDev\AmazonMws\AmazonProductsCore;
 
 /**
  * Copyright 2013 CPI Group, LLC
